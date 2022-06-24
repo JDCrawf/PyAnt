@@ -23,7 +23,13 @@ sim_window = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))	# creates 
 sim_canvas = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))			# creates the canvas which later game screens will be drawn on
 pygame.display.set_caption("Ant Simulator") 
 
-# 
+test_surface = pygame.Surface((32,32))
+test_surface.fill('Red')
+test_x = DISPLAY_WIDTH/2
+test_y = DISPLAY_HEIGHT/2
+test_speed = 4
+
+# game/sim loop
 while RUNNING:
 	# Limiting framerate using delta time
 	clock.tick(TARGET_FPS)
@@ -35,11 +41,22 @@ while RUNNING:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			RUNNING = False
+	key_event = pygame.key.get_pressed()
+	if key_event[pygame.K_UP]:
+		test_y -= test_speed
+	if key_event[pygame.K_DOWN]:
+		test_y += test_speed
+	if key_event[pygame.K_LEFT]:
+		test_x -= test_speed
+	if key_event[pygame.K_RIGHT]:
+		test_x += test_speed
+
 
 	fps_text = font.render("FPS: " + str(round(clock.get_fps(), 2)), False, (255, 255, 255))
 
 	sim_canvas.fill((0, 0, 0))
 	sim_canvas.blit(fps_text, (0,0))
+	sim_canvas.blit(test_surface, (test_x, test_y))
 
 	sim_window.blit(sim_canvas, (0, 0))
 	pygame.display.update()
