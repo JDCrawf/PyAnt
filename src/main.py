@@ -1,4 +1,4 @@
-import pygame, time
+import pygame, time, math
 from sys import exit
 
 pygame.init()
@@ -21,13 +21,39 @@ dt = 0
 # creates simulation main window
 sim_window = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))	# creates the main display window
 sim_canvas = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))			# creates the canvas which later game screens will be drawn on
-pygame.display.set_caption("Ant Simulator") 
+pygame.display.set_caption("Ant Simulator")
 
-test_surface = pygame.Surface((32,32))
-test_surface.fill('Red')
+test_ant = pygame.image.load('img/Ant.png')
 test_x = DISPLAY_WIDTH/2
 test_y = DISPLAY_HEIGHT/2
-test_speed = 4
+test_speed = 1
+test_facing = 0
+
+def ant_movement(key, _x, _y, _facing, _speed):
+	# TODO replace movement with angle/velocity movement
+	# up moves forward, side arrows change angle
+	# Note: SOHCAHtoa
+	# facing is an int value between 0 and 359, saved to each ant object, 0 is directly right going clockwise
+	# sin(theta) = opposite/hypoteneuse
+	# sin(facing) = y-displacement/move_speed
+	# y-displacement = move_speed * sin(facing)
+	# x-displacement = move_speed * cos(facing)
+	if key[pygame.K_UP]:
+		vel = _speed
+	else:
+		vel = 0
+	if key[pygame.K_LEFT]:
+		_facing -= 1
+	if key[pygame.K_RIGHT]:
+		_facing += 1
+	if _facing > 359:
+		_facing -= 360
+	if _facing < 0:
+		_facing += 360
+
+	_x += vel * math.cos(math.radians(_facing))
+	_y += vel * math.sin(math.radians(_facing))
+	return _x, _y, _facing
 
 # game/sim loop
 while RUNNING:
@@ -41,22 +67,18 @@ while RUNNING:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			RUNNING = False
-	key_event = pygame.key.get_pressed()
-	if key_event[pygame.K_UP]:
-		test_y -= test_speed
-	if key_event[pygame.K_DOWN]:
-		test_y += test_speed
-	if key_event[pygame.K_LEFT]:
-		test_x -= test_speed
-	if key_event[pygame.K_RIGHT]:
-		test_x += test_speed
+	
+	# testing movement
+	# TODO this doesn't work, need to fix it, rotate blit
+	test_x, test_y, test_facing = ant_movement(pygame.key.get_pressed(), test_x, test_y, test_facing, test_speed)
+	test_ant = pygame.transform.rotate(test_ant, test_facing)
 
+	sim_canvas.fill('gray45')
 
-	fps_text = font.render("FPS: " + str(round(clock.get_fps(), 2)), False, (255, 255, 255))
+	fps_text = font.render("FPS: " + str(round(clock.get_fps(), 2)) + "\nFacing: " + str(test_facing), False, (255, 255, 255))
 
-	sim_canvas.fill((0, 0, 0))
 	sim_canvas.blit(fps_text, (0,0))
-	sim_canvas.blit(test_surface, (test_x, test_y))
+	sim_canvas.blit(test_ant, (test_x, test_y))
 
 	sim_window.blit(sim_canvas, (0, 0))
 	pygame.display.update()
